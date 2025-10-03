@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expo Form</title>
+<style>
+    /* Base Styles - IMPROVED FOR ALIGNMENT AND MOBILE */
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0; 
+        padding: 20px;
+        background: #f4f6f9;
+        box-sizing: border-box; /* Ensures padding is included in element's total width */
+    }
+    form {
+        max-width: 400px;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+    }
+    label {
+        font-weight: bold;
+        margin-top: 15px; /* Increased top margin for better separation */
+        margin-bottom: 5px; /* Added space below label */
+        display: block;
+        color: #333;
+    }
+    select, input:not([type="submit"]):not([type="button"]), textarea {
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box; /* Crucial for alignment */
+        margin: 0; 
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        transition: border-color 0.2s;
+    }
+    select:focus, input:focus, textarea:focus {
+        border-color: #007bff; 
+        outline: none;
+    }
+    textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    /* Phone Row Layout - FIXED ALIGNMENT */
+    .row {
+        display: flex;
+        gap: 10px;
+        align-items: center; 
+    }
+    #countryCodeWrapper {
+        position: relative;
+        flex: 0 0 70px; /* Fixed smaller width for country code */
+    }
+    #countryCodeWrapper span {
+        position: absolute;
+        left: 12px; 
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 16px; 
+        color: #555;
+        pointer-events: none;
+    }
+    #countryCode {
+        padding-left: 22px; /* Adjusted padding to accommodate the '+' sign */
+        text-align: right; /* Align number to the right */
+    }
+    #phoneNumber {
+        flex: 1; /* Takes the remaining space */
+    }
+    
+    /* WhatsApp Link */
+    #whatsappLink {
+        margin-top: 20px; 
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+        display: none;
+        text-align: center;
+    }
+    #whatsappLink a {
+        display: inline-block;
+        padding: 10px 20px;
+        background: #25D366;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        transition: background 0.3s;
+    }
+
+    /* Submit Button */
+    button {
+        width: 100%;
+        padding: 12px;
+        margin-top: 20px; 
+        font-size: 18px; 
+        font-weight: bold;
+        color: white;
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s, transform 0.1s;
+    }
+    button:hover:not(:disabled) {
+        background: linear-gradient(135deg, #0056b3, #003f88);
+    }
+    button:active:not(:disabled) {
+        transform: scale(0.98); 
+    }
+    button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 480px) {
+        body {
+            padding: 10px; 
+        }
+        form {
+            padding: 15px;
+            box-shadow: none; 
+            border-radius: 0;
+        }
+    }
+</style>
+</head>
+<body>
+    <form id="leadForm">
+        <label for="agent">Agent</label>
+        <select id="agent" required>
+            <option value="">Select agent</option>
+            <option value="Suzan">Suzan</option>
+            <option value="Merry">Merry</option>
+            <option value="Nima">Nima</option>
+            <option value="Navid">Navid</option>
+            <option value="Katherine">Katherine</option>
+        </select>
+
+        <label for="name">Name</label>
+        <input type="text" id="name" required placeholder="Full Name">
+
+        <label>WhatsApp Number</label>
+        <div class="row">
+            <div id="countryCodeWrapper">
+                <span>+</span>
+                <input type="tel" id="countryCode" inputmode="numeric" pattern="[0-9]*" maxlength="4" required placeholder="00">
+            </div>
+            <input type="tel" id="phoneNumber" inputmode="numeric" pattern="[0-9]*" required placeholder="Phone Number">
+        </div>
+
+        <label for="description">Description</label>
+        <textarea id="description" required placeholder="Detailed description of the lead..."></textarea>
+
+        <div id="whatsappLink">
+            <a href="#" target="_blank">Open WhatsApp</a>
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+
+<script>
+// Original JavaScript logic is preserved.
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwrJoFjIBfF_PNc-lU1256C6AmalQP3f9KsWJoEoh3WlpF4GCiWoX_L7zUd7OWYS76AwA/exec"; // replace with your deployed Apps Script /exec URL
+
+const agentSelect = document.getElementById("agent");
+const countryCodeInput = document.getElementById("countryCode");
+const phoneInput = document.getElementById("phoneNumber");
+const whatsappDiv = document.getElementById("whatsappLink");
+const whatsappAnchor = whatsappDiv.querySelector("a");
+
+// Restore agent from localStorage
+document.addEventListener("DOMContentLoaded", () => {
+    const savedAgent = localStorage.getItem("selectedAgent");
+    if (savedAgent) agentSelect.value = savedAgent;
+});
+
+// Realtime WhatsApp link
+function updateWhatsappLink() {
+    const cc = countryCodeInput.value.replace(/\D/g, "");
+    const num = phoneInput.value.replace(/\D/g, "");
+    if (cc && num) {
+        const full = cc + num;
+        whatsappAnchor.href = "https://wa.me/" + full;
+        whatsappAnchor.textContent = "Open WhatsApp (" + full + ")";
+        whatsappDiv.style.display = "block";
+    } else {
+        whatsappDiv.style.display = "none";
+    }
+}
+countryCodeInput.addEventListener("input", updateWhatsappLink);
+phoneInput.addEventListener("input", updateWhatsappLink);
+
+// Submit handler
+document.getElementById("leadForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const submitBtn = e.target.querySelector("button[type='submit']");
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Please wait...";
+
+    const agent = agentSelect.value;
+    const name = document.getElementById("name").value;
+    const cc = countryCodeInput.value.replace(/\D/g, "");
+    const num = phoneInput.value.replace(/\D/g, "");
+    const fullNumber = cc + num;
+    const whatsappLink = "https://wa.me/" + fullNumber;
+    const description = document.getElementById("description").value;
+
+    if (!description) {
+        alert("Description is required.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit";
+        return;
+    }
+
+    const payload = { agent, name, countryCode: cc, phoneNumber: num, fullNumber, whatsappLink, description };
+
+    try {
+        const res = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
+        const data = await res.json();
+        console.log("Saved:", data);
+
+        localStorage.setItem("selectedAgent", agent);
+
+        document.getElementById("leadForm").reset();
+        agentSelect.value = agent;
+        whatsappDiv.style.display = "none";
+
+        alert("Lead saved successfully!");
+    } catch (err) {
+        console.error("Submit failed:", err);
+        alert("Submission failed. Check console.");
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Submit";
+});
+</script>
+</body>
+</html>
